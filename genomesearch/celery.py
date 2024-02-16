@@ -23,7 +23,5 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 
 @app.task
-def divide(x, y):
-    import time
-    time.sleep(2)
-    return x / y
+def align(sequence, genome_name):
+    return sequence, genome_name

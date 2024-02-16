@@ -23,3 +23,6 @@ typing_extensions==4.9.0
 vine==5.1.0
 wcwidth==0.2.13
 wrapt==1.16.0
+djangorestframework
+django-cors-headers
+psycopg2-binary
