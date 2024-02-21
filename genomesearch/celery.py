@@ -4,7 +4,7 @@ https://docs.celeryq.dev/en/stable/django/first-steps-with-django.html
 import os
 
 from celery import Celery
-
+from celery.result import AsyncResult
 from django.conf import settings
 
 # this code copied from manage.py
@@ -23,5 +23,10 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 
 @app.task
-def align(sequence, genome_name):
+def align(sequence: str, genome_name: str):
     return sequence, genome_name
+
+@app.task
+def get_job(task_id):
+    task = AsyncResult(task_id)
+    return dict(task)
