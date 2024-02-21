@@ -1,24 +1,23 @@
 from django.shortcuts import render
+
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from genome_finder.constants import GENOMES
 import json
 
-from genomesearch.celery import align as celery_align, get_job as celery_get_job
-
+from genomesearch.celery import align_to_all, get_jobs as celery_get_jobs
 task_ids = []
 
 @api_view(['POST'])
 def align(request):
     data = json.loads(request.body)
     sequence = data.get("sequence")
-    for genome_name in GENOMES:
-        task = celery_align.delay(sequence, genome_name)
-    task_ids.append(task.id)
-    return Response({'jobId': task.id,
-                     'status': task.status})
+    task = align_to_all.delay(sequence)
+    return Response({"task_id": task.id,
+                     "status": task.status,
+                     "result": task.result,
+                     "date_done": task.date_done})
 
 @api_view(['GET'])
 def get_jobs(request):
-    task_detail = [celery_get_job(task_id) for task_id in task_ids]
-    return Response(task_detail)
+    tasks = celery_get_jobs()
+    return Response(tasks)

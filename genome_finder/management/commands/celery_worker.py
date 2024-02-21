@@ -13,7 +13,8 @@ def restart_celery():
         cmd = "taskkill /f /t /im celery.exe"
 
     subprocess.call(shlex.split(cmd))
-    subprocess.call(shlex.split(f"{celery_worker_cmd} --loglevel=info"))
+    subprocess.Popen(shlex.split(f"{celery_worker_cmd} -n worker1@%h --loglevel=info -Q celery"))
+    subprocess.Popen(shlex.split(f"{celery_worker_cmd} -n worker2@%h --loglevel=info -Q subtask_queue"))
 
 
 class Command(BaseCommand):
