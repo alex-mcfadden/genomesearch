@@ -10,6 +10,10 @@ from celery.result import allow_join_result
 from genome_finder.constants import GENOMES
 from celery import group
 
+from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.Align import PairwiseAligner
+
 # this code copied from manage.py
 # set the default Django settings module for the 'celery' app.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'genomesearch.settings')
@@ -38,7 +42,36 @@ def align_to_all(sequence: str):
 
 @app.task
 def align(sequence: str, genome_name: str):
-    return sequence, genome_name
+    nucleotide_sequence = Seq(sequence)
+    genome = SeqIO.read(os.path.join(os.getcwd(), f"genome_finder/genomes/{genome_name}.gb"), "genbank")
+    aligner = PairwiseAligner()
+    aligner.mode = 'local'
+    aligner.open_gap_score = -30 
+    aligner.extend_gap_score = -10
+    aligner.mismatch_score = -1
+    aligner.match_score = 1
+
+    for feature in genome.features:
+        if feature.type == "CDS":
+            gene_name = feature.qualifiers.get("gene", [""])[0]
+            gene_sequence = feature.extract(genome.seq)
+            alignments = aligner.align(nucleotide_sequence, gene_sequence)
+            if alignments: # return only top found alignment
+                score = alignments[0].score
+                if score > len(nucleotide_sequence) * 0.95:
+                    indices = alignments[0].indices
+                    return {
+                        "input_sequence": sequence,
+                        "genome": genome_name,
+                        "gene_name": gene_name,
+                        "startbp_sample": int(indices[0][0]) + 1,
+                        "endbp_sample": int(indices[0][-1]) + 1,
+                        "startbp_genome": int(indices[1][0]) + feature.location.start + 1,
+                        "endbp_genome": int(indices[1][-1]) + feature.location.start + 1,
+                        "score": float(alignments[0].score)
+                    }
+    return None
+
 
 def get_jobs():
     from django_celery_results.models import TaskResult

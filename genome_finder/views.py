@@ -11,7 +11,7 @@ task_ids = []
 def align(request):
     data = json.loads(request.body)
     sequence = data.get("sequence")
-    task = align_to_all.delay(sequence)
+    task = align_to_all.delay(sequence.upper())
     return Response({"task_id": task.id,
                      "status": task.status,
                      "result": task.result,
