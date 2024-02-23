@@ -5,7 +5,7 @@ import os
 
 from celery import Celery
 from django.conf import settings
-
+from time import sleep
 from celery.result import allow_join_result
 from genome_finder.constants import GENOMES
 from celery import group
@@ -38,6 +38,7 @@ def align_to_all(sequence: str):
                 for result in group_results: # don't search anywhere else after alignment is found
                     app.control.revoke(result.task_id, terminate=True)
                 return group_results[i].result
+    return {"sequence": sequence, "error": "No alignment found"}
 
 
 @app.task
@@ -70,15 +71,12 @@ def align(sequence: str, genome_name: str):
                         "endbp_genome": int(indices[1][-1]) + feature.location.start + 1,
                         "score": float(alignments[0].score)
                     }
-    return None
 
 
 def get_jobs():
     from django_celery_results.models import TaskResult
-
     tasks = TaskResult.objects.filter(task_name="genomesearch.celery.align_to_all")
     decoded_tasks = []
-
     for task in tasks:
         decoded_tasks.append({
             "id": task.id,
@@ -88,3 +86,8 @@ def get_jobs():
         })
 
     return decoded_tasks
+
+def get_job_status(job_id):
+    from django_celery_results.models import TaskResult
+    task = TaskResult.objects.get(id=job_id)
+    return task.status
