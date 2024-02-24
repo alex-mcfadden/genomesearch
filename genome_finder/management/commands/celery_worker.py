@@ -7,6 +7,9 @@ from django.utils import autoreload
 
 
 def restart_celery():
+    """
+    restart of celery workers when code changes.
+    """
     celery_worker_cmd = "celery -A genomesearch worker"
     cmd = f'pkill -f "{celery_worker_cmd}"'
     if sys.platform == "win32":
@@ -18,6 +21,9 @@ def restart_celery():
 
 
 class Command(BaseCommand):
+    """
+    Custom management command to start a celery worker with autoreload.
+    """
     def handle(self, *args, **options):
         print("Starting celery worker with autoreload...")
         autoreload.run_with_reloader(restart_celery)
