@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-
+import "./JobsTable.css";
 const JobsTable = () => {
   const [jobs, setJobs] = useState([]);
 
@@ -11,7 +11,7 @@ const JobsTable = () => {
   }, []);
 
   return (
-    <table>
+    <table className="jobs-table">
       <thead>
         <tr>
           <th>Job ID</th>

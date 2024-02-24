@@ -1,0 +1,17 @@
+.jobs-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .jobs-table th, .jobs-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  
+  .jobs-table th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #4CAF50;
+    color: white;
+  }
