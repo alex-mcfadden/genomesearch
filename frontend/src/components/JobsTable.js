@@ -1,5 +1,11 @@
-import React, {useEffect, useState} from 'react';
-import './JobsTable.css';
+import React, { useEffect, useState } from 'react';
+import "./JobsTable.css";
+
+/**
+ * Shows a table with all jobs that have been submitted
+ * @returns Table component
+ */
+
 const JobsTable = () => {
   const [jobs, setJobs] = useState([]);
 

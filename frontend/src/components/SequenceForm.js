@@ -1,6 +1,9 @@
 import React, {useState} from 'react';
 import axios from 'axios';
-
+/**
+ * Form to submit a sequence to the job queue
+ * @returns 
+ */
 function SequenceForm() {
   const [value, setValue] = useState('');
   const [status, setStatus] = useState('');
