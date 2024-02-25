@@ -1,5 +1,6 @@
 from django_celery_results.models import TaskResult
 
+
 def get_jobs():
     """
     Get all celery align_to_all jobs from the database, and return a list of dictionaries with

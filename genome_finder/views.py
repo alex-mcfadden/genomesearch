@@ -1,24 +1,24 @@
-from django.shortcuts import render
-
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework.request import Request
 import json
 
-from genomesearch.tasks.fetch_jobs import get_jobs, get_job_status 
+from rest_framework.decorators import api_view
+from rest_framework.request import Request
+from rest_framework.response import Response
+
 from genomesearch.tasks.align import align_to_all
+from genomesearch.tasks.fetch_jobs import get_job_status, get_jobs
+
 
 @api_view(['POST'])
 def align_view(request: Request):
     """
-    Endpoint to align a sequence against all genomes in the database, 
+    Endpoint to align a sequence against all genomes in the database,
     returning information on the first close match. Validates data for DNA
     characters, and returns a task ID for the celery job. Returns a 400 error
     if no sequence is provided, or if the sequence contains invalid characters.
-    
+
     Args:
         request: Request object with JSON body containing a "sequence" key.
-    
+
     Returns:
         Response object with a JSON body containing the task ID, status,
         result, and date_done of the celery job.
@@ -27,7 +27,7 @@ def align_view(request: Request):
     sequence = data.get("sequence")
     if not sequence:
         return Response({"error": "No sequence provided"}, status=400)
-    if not all([base in "ACGTatcg" for base in sequence]):
+    if not all(base in "ACGTatcg" for base in sequence):
         return Response({"error": "Invalid sequence"}, status=400)
 
     task = align_to_all.delay(sequence.upper())
@@ -37,21 +37,23 @@ def align_view(request: Request):
                      "result": task.result,
                      "date_done": task.date_done})
 
+
 @api_view(['GET'])
 def get_jobs_view(request: Request):
     """
-    Endpoint to get all celery jobs. See the celery_get_jobs 
+    Endpoint to get all celery jobs. See the celery_get_jobs
     docstring for more detail.
 
     Args:
         request: Request object with no body. The request is not used.
-    Returns:   
+    Returns:
         Response object with a JSON body containing the task IDs, statuses,
         results, and date_dones of the celery jobs.
 
     """
     tasks = get_jobs()
     return Response(tasks)
+
 
 @api_view(['GET'])
 def get_job_status_view(request: Request):
@@ -64,7 +66,7 @@ def get_job_status_view(request: Request):
         request: Request object with a query parameter "job_id".
     Returns:
         Response object with a JSON body containing the status of the job.
-    
+
     """
     job_id = request.query_params.get("job_id")
     if not job_id:
