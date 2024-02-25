@@ -8,8 +8,6 @@ import json
 from genomesearch.tasks.fetch_jobs import get_jobs, get_job_status 
 from genomesearch.tasks.align import align_to_all
 
-task_ids = []
-
 @api_view(['POST'])
 def align_view(request: Request):
     """
@@ -33,6 +31,7 @@ def align_view(request: Request):
         return Response({"error": "Invalid sequence"}, status=400)
 
     task = align_to_all.delay(sequence.upper())
+
     return Response({"task_id": task.id,
                      "status": task.status,
                      "result": task.result,
@@ -70,5 +69,4 @@ def get_job_status_view(request: Request):
     job_id = request.query_params.get("job_id")
     if not job_id:
         return Response({"error": "No job_id provided"}, status=400)
-    from django_celery_results.models import TaskResult
     return Response(get_job_status(job_id))
