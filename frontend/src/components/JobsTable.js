@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import "./JobsTable.css";
+import React, {useEffect, useState} from 'react';
+import './JobsTable.css';
 const JobsTable = () => {
   const [jobs, setJobs] = useState([]);
 
   useEffect(() => {
     fetch('http://localhost:8010/api/get_jobs')
-      .then(response => response.json())
-      .then(data => setJobs(data))
-      .catch(error => console.error(error));
+        .then((response) => response.json())
+        .then((data) => setJobs(data))
+        .catch((error) => console.error(error));
   }, []);
 
   return (
@@ -21,7 +21,7 @@ const JobsTable = () => {
         </tr>
       </thead>
       <tbody>
-        {jobs.map(job => (
+        {jobs.map((job) => (
           <tr key={job.id}>
             <td>{job.id}</td>
             <td>{job.status}</td>

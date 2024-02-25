@@ -1,5 +1,4 @@
-from genomesearch.celery import app
-from genome_finder import genomes
+import os
 
 from Bio import SeqIO
 from Bio.Align import PairwiseAligner
@@ -7,24 +6,29 @@ from Bio.Seq import Seq
 from celery import group
 from celery.result import allow_join_result
 
-import os
+from genome_finder import genomes
+from genomesearch.celery import app
 
 
 @app.task
 def align_to_all(sequence: str):
     """
-    Aligns a sequence to all genomes in the database, returning information on the first close match.
-    Calls the celery "align" task for each genome, and returns the first alignment found, canceling any
-    pending tasks. If no alignment is found, returns an error message.
+    Aligns a sequence to all genomes in the database, returning information on the first close
+    match.Calls the celery "align" task for each genome, and returns the first alignment found,
+    canceling any pending tasks. If no alignment is found, returns an error message.
 
     Args:
         sequence: DNA sequence to align to all genomes in the database.
     
     Returns:
-        Dictionary with information on the first close match, or an error message if no alignment is found.
+        Dictionary with information on the first close match, or an error message if no alignment
+        is found.
     
     """
-    subtasks = [align.s(sequence, genome_name).set(queue='subtask_queue') for genome_name in get_genome_filenames()]
+    subtasks = [
+        align.s(sequence, genome_name).set(queue='subtask_queue')
+        for genome_name in get_genome_filenames()
+    ]
     group_results = group(subtasks).apply_async()
     with allow_join_result():
         for i, result in enumerate(group_results.join()):
@@ -59,10 +63,11 @@ def align(sequence: str, genome_name: str):
         
     """
     nucleotide_sequence = Seq(sequence)
-    genome = SeqIO.read(os.path.join(os.getcwd(), f"genome_finder/genomes/{genome_name}"), "genbank")
+    path = f"genome_finder/genomes/{genome_name}"
+    genome = SeqIO.read(os.path.join(os.getcwd(), path), "genbank")
     aligner = PairwiseAligner()
     aligner.mode = 'local'
-    aligner.open_gap_score = -30 
+    aligner.open_gap_score = -30
     aligner.extend_gap_score = -10
     aligner.mismatch_score = -1
     aligner.match_score = 1
@@ -85,6 +90,7 @@ def align(sequence: str, genome_name: str):
                     indices = get_indices(alignments[0].indices, feature.location.start)
                     result_data.update(indices)
                     return result_data
+    return None
 
 def get_genome_filenames():
     """
