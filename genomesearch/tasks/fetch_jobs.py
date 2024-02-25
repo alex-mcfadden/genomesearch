@@ -17,10 +17,10 @@ def get_jobs():
         })
     return decoded_tasks
 
-def get_job_status(job_id: int):
+def get_job_status(job_id: str):
     """
-    Get the status of a celery job from the database by job ID (not UUID), 
+    Get the status of a celery job from the database by job UUID, 
     and return the status. Useful for checking if a job is finished or not.
     """
-    task = TaskResult.objects.get(id=job_id)
+    task = TaskResult.objects.get(task_id=job_id)
     return task.status

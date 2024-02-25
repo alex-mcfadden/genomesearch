@@ -17,7 +17,7 @@ const JobsTable = () => {
           <th>Job ID</th>
           <th>Status</th>
           <th>Result</th>
-          <th>Date</th>
+          <th>Time Created</th>
         </tr>
       </thead>
       <tbody>
